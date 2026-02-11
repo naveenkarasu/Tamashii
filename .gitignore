@@ -9,10 +9,13 @@ src-tauri/gen/
 # IDE
 .vscode/
 .idea/
+*.swp
+*.swo
 
 # OS
 .DS_Store
 Thumbs.db
+Desktop.ini
 
 # Env
 .env
@@ -21,8 +24,18 @@ Thumbs.db
 # Blender backups
 *.blend1
 
-# Build scripts (local only)
-build-android.bat
-
 # Logs
 *.log
+
+# Local build scripts
+build-android.bat
+
+# AI context files (regenerable)
+PROJECT_INDEX.json
+PROJECT_INDEX.md
+
+# Raw VRM source files
+vrm/
+
+# Screenshots (local testing)
+screenshots/
