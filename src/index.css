@@ -1,0 +1,315 @@
+@import "tailwindcss";
+
+/* ============================================
+   FONT FACE DECLARATIONS
+   ============================================ */
+
+@font-face {
+  font-family: 'Orbitron';
+  src: url('./assets/fonts/Orbitron-Bold.woff2') format('truetype');
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('./assets/fonts/JetBrainsMono-Variable.woff2') format('truetype');
+  font-weight: 100 800;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('./assets/fonts/Inter-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Zen Maru Gothic';
+  src: url('./assets/fonts/ZenMaruGothic-Regular.woff2') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Zen Maru Gothic';
+  src: url('./assets/fonts/ZenMaruGothic-Medium.woff2') format('truetype');
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Zen Maru Gothic';
+  src: url('./assets/fonts/ZenMaruGothic-Bold.woff2') format('truetype');
+  font-weight: 700;
+  font-display: swap;
+}
+
+/* ============================================
+   TAILWIND v4 THEME
+   ============================================ */
+
+@theme {
+  --font-display: 'Orbitron', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-anime: 'Zen Maru Gothic', sans-serif;
+
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-card: var(--bg-card);
+  --color-bg-card-hover: var(--bg-card-hover);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-accent: var(--accent);
+  --color-accent-alt: var(--accent-alt);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-border: var(--border-color);
+  --color-mono-text: var(--mono-text);
+}
+
+/* ============================================
+   CSS VARIABLES - DARK MODE (DEFAULT)
+   ============================================ */
+
+:root {
+  --bg-primary: #09090b;
+  --bg-card: #18181b;
+  --bg-card-hover: #1f1f23;
+  --text-primary: #fafafa;
+  --text-secondary: #a1a1aa;
+  --accent: #22d3ee;
+  --accent-alt: #3b82f6;
+  --danger: #f43f5e;
+  --success: #4ade80;
+  --warning: #fbbf24;
+  --border-color: #27272a;
+  --mono-text: #22d3ee;
+  --accent-glow: rgba(34, 211, 238, 0.1);
+  --danger-glow: rgba(244, 63, 94, 0.3);
+  --success-glow: rgba(74, 222, 128, 0.2);
+
+  /* Mesh gradient colors */
+  --mesh-color-1: rgba(34, 211, 238, 0.05);
+  --mesh-color-2: rgba(59, 130, 246, 0.05);
+  --mesh-base: #09090b;
+}
+
+/* ============================================
+   LIGHT MODE
+   ============================================ */
+
+[data-theme="light"] {
+  --bg-primary: #fafafa;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f4f4f5;
+  --text-primary: #09090b;
+  --text-secondary: #52525b;
+  --accent: #0891b2;
+  --accent-alt: #2563eb;
+  --danger: #e11d48;
+  --success: #16a34a;
+  --warning: #d97706;
+  --border-color: #e4e4e7;
+  --mono-text: #0891b2;
+  --accent-glow: rgba(8, 145, 178, 0.1);
+  --danger-glow: rgba(225, 29, 72, 0.15);
+  --success-glow: rgba(22, 163, 74, 0.15);
+
+  --mesh-color-1: rgba(8, 145, 178, 0.03);
+  --mesh-color-2: rgba(37, 99, 235, 0.03);
+  --mesh-base: #fafafa;
+}
+
+/* ============================================
+   ANIME MODE
+   ============================================ */
+
+[data-theme="anime"] {
+  --bg-primary: #0d0015;
+  --bg-card: #1a0a2e;
+  --bg-card-hover: #221338;
+  --text-primary: #fef3c7;
+  --text-secondary: #c4b5fd;
+  --accent: #f472b6;
+  --accent-alt: #8b5cf6;
+  --danger: #fb7185;
+  --success: #4ade80;
+  --warning: #fbbf24;
+  --border-color: #2d1b4e;
+  --mono-text: #f472b6;
+  --accent-glow: rgba(244, 114, 182, 0.15);
+  --danger-glow: rgba(251, 113, 133, 0.3);
+  --success-glow: rgba(74, 222, 128, 0.2);
+
+  --mesh-color-1: rgba(244, 114, 182, 0.08);
+  --mesh-color-2: rgba(139, 92, 246, 0.08);
+  --mesh-base: #0d0015;
+}
+
+/* Anime mode uses Zen Maru Gothic for all UI text */
+[data-theme="anime"] body {
+  font-family: 'Zen Maru Gothic', sans-serif;
+}
+
+/* ============================================
+   BASE STYLES
+   ============================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* ============================================
+   ANIME MODE SPARKLE PARTICLES
+   ============================================ */
+
+@keyframes sparkle {
+  0% { opacity: 0; transform: translateY(0) scale(0); }
+  50% { opacity: 1; transform: translateY(-100px) scale(1); }
+  100% { opacity: 0; transform: translateY(-200px) scale(0); }
+}
+
+.sparkle {
+  position: fixed;
+  width: 4px;
+  height: 4px;
+  background: #f472b6;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: sparkle 3s ease-in-out infinite;
+  box-shadow: 0 0 6px #f472b6;
+  z-index: 0;
+}
+
+.sparkle:nth-child(even) {
+  background: #fbbf24;
+  box-shadow: 0 0 6px #fbbf24;
+}
+
+.sparkle:nth-child(3n) {
+  background: #8b5cf6;
+  box-shadow: 0 0 6px #8b5cf6;
+}
+
+/* ============================================
+   ANIME MODE GRADIENT BORDERS
+   ============================================ */
+
+[data-theme="anime"] .card-anime-border {
+  position: relative;
+  border: none;
+}
+
+[data-theme="anime"] .card-anime-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, #f472b6, #8b5cf6, #06b6d4);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ============================================
+   GRADIENT TEXT (ANIME MODE)
+   ============================================ */
+
+.gradient-text-anime {
+  background: linear-gradient(90deg, #f472b6, #fbbf24);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ============================================
+   PANIC BUTTON PULSE
+   ============================================ */
+
+@keyframes panic-pulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(244, 63, 94, 0.3); }
+  50% { box-shadow: 0 0 30px rgba(244, 63, 94, 0.6); }
+}
+
+.panic-pulse {
+  animation: panic-pulse 2s ease-in-out infinite;
+}
+
+/* ============================================
+   BREATHING EXERCISE
+   ============================================ */
+
+@keyframes breathe-glow {
+  0%, 100% { filter: drop-shadow(0 0 5px var(--accent)); }
+  50% { filter: drop-shadow(0 0 20px var(--accent)); }
+}
+
+/* ============================================
+   WINDOW DRAG REGION
+   ============================================ */
+
+.drag-region {
+  -webkit-app-region: drag;
+}
+
+.no-drag {
+  -webkit-app-region: no-drag;
+}
+
+/* ============================================
+   TRANSITIONS
+   ============================================ */
+
+.transition-default {
+  transition: all 200ms ease;
+}
+
+/* Neon glow on hover for cards */
+.card-glow:hover {
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+
+/* Active sidebar item */
+.sidebar-active {
+  border-left: 3px solid var(--accent);
+  color: var(--accent);
+}

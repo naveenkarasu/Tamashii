@@ -1,0 +1,111 @@
+{
+  "project": {
+    "name": "Tamashii",
+    "package_name": "funtime-app",
+    "description": "Personal Focus & Recovery Desktop/Mobile App",
+    "version": "0.1.0",
+    "identifier": "com.tamashii.app",
+    "generated": "2026-02-10"
+  },
+  "tech_stack": {
+    "framework": "Tauri v2",
+    "frontend": "React 19 + TypeScript",
+    "backend": "Rust",
+    "css": "Tailwind CSS v4",
+    "bundler": "Vite 7",
+    "state": "Zustand 5",
+    "router": "react-router 7",
+    "database": "SQLite (tauri-plugin-sql)",
+    "3d": "Three.js + @react-three/fiber + @pixiv/three-vrm"
+  },
+  "entry_points": {
+    "frontend": "src/main.tsx",
+    "backend": "src-tauri/src/main.rs",
+    "app_setup": "src-tauri/src/lib.rs",
+    "html": "index.html"
+  },
+  "routes": [
+    { "path": "/", "component": "DashboardPage", "file": "src/components/dashboard/DashboardPage.tsx" },
+    { "path": "/blocker", "component": "BlockerPage", "file": "src/components/blocker/BlockerPage.tsx" },
+    { "path": "/panic", "component": "PanicPage", "file": "src/components/panic/PanicPage.tsx" },
+    { "path": "/stats", "component": "StatsPage", "file": "src/components/stats/StatsPage.tsx" },
+    { "path": "/journal", "component": "JournalPage", "file": "src/components/journal/JournalPage.tsx" },
+    { "path": "/achievements", "component": "AchievementsPage", "file": "src/components/achievements/AchievementsPage.tsx" },
+    { "path": "/settings", "component": "SettingsPage", "file": "src/components/settings/SettingsPage.tsx" }
+  ],
+  "stores": [
+    { "name": "useAppStore", "file": "src/store/appStore.ts", "state": ["theme", "mascotGender", "notificationTime", "notificationsEnabled", "sidebarExpanded", "currentPage"] },
+    { "name": "useStreakStore", "file": "src/store/streakStore.ts", "state": ["currentStreakStart", "bestStreakDays", "totalResets", "isRunning"] },
+    { "name": "useBlockerStore", "file": "src/store/blockerStore.ts", "state": ["isLocked", "lockExpiresAt", "categories", "customDomains"] },
+    { "name": "useAchievementStore", "file": "src/store/achievementStore.ts", "state": ["achievements"] }
+  ],
+  "tauri_commands": [
+    { "name": "apply_blocklist", "file": "src-tauri/src/commands/blocker.rs", "params": "domains: Vec<String>" },
+    { "name": "remove_blocklist", "file": "src-tauri/src/commands/blocker.rs", "params": "()" },
+    { "name": "get_blocker_status", "file": "src-tauri/src/commands/blocker.rs", "params": "()" },
+    { "name": "check_admin", "file": "src-tauri/src/commands/blocker.rs", "params": "()" },
+    { "name": "extend_lock", "file": "src-tauri/src/commands/blocker.rs", "params": "hours: u64" },
+    { "name": "get_streak_data", "file": "src-tauri/src/commands/streak.rs", "params": "start, best, resets" },
+    { "name": "save_streak_data", "file": "src-tauri/src/commands/streak.rs", "params": "start, best, resets" }
+  ],
+  "backend_services": [
+    { "name": "hosts", "file": "src-tauri/src/blocker/hosts.rs", "purpose": "Windows hosts file blocking with TAMASHII markers" },
+    { "name": "watcher", "file": "src-tauri/src/blocker/watcher.rs", "purpose": "Tamper-protection: re-applies hosts every 60s" },
+    { "name": "quote_scheduler", "file": "src-tauri/src/scheduler/quote_scheduler.rs", "purpose": "Daily motivational notification at 09:30" }
+  ],
+  "database_tables": [
+    "settings", "streaks", "block_categories", "blocked_domains", "achievements", "journal_entries", "daily_logs", "quotes"
+  ],
+  "themes": [
+    { "id": "dark", "accent": "#22d3ee", "bg": "#09090b", "font": "Inter" },
+    { "id": "light", "accent": "#0891b2", "bg": "#fafafa", "font": "Inter" },
+    { "id": "anime", "accent": "#f472b6", "bg": "#0d0015", "font": "Zen Maru Gothic" }
+  ],
+  "types": {
+    "file": "src/types/index.ts",
+    "exports": ["Theme", "MascotGender", "Mood", "Settings", "StreakData", "BlockCategory", "BlockerStatus", "JournalEntry", "Achievement", "Quote", "DailyLog", "MascotExpression", "MascotDialogue", "QuickStat"]
+  },
+  "data_modules": {
+    "achievements": { "file": "src/lib/achievements.ts", "count": 25, "categories": ["streak(9)", "blocker(5)", "journal(5)", "panic(3)", "special(3)"] },
+    "blocklists": { "file": "src/lib/blocklists.ts", "total_domains": 350, "categories": ["adult(150+)", "social_media(33)", "gambling(24)", "news(24)", "entertainment(19)", "gaming(19)", "shopping(15)"] },
+    "quotes": { "file": "src/lib/quotes.ts", "count": 110, "categories": ["motivation(30)", "discipline(30)", "recovery(25)", "productivity(25)"] },
+    "mascotDialogues": { "file": "src/lib/mascotDialogues.ts", "contexts": ["first_day", "day_3", "day_7", "day_14", "day_30", "day_90", "day_365", "after_panic", "achievement_unlock", "random_daily", "greeting", "encouragement"] }
+  },
+  "components": {
+    "layout": ["AppShell", "TopBar", "Sidebar"],
+    "dashboard": ["DashboardPage", "StreakCounter", "DailyQuote", "QuickStats", "PanicButton"],
+    "blocker": ["BlockerPage", "CategoryCard", "ActivateForm", "LockStatus", "DomainListModal"],
+    "panic": ["PanicPage", "BreathingExercise", "GroundingExercise", "ProductiveActions"],
+    "stats": ["StatsPage", "CalendarHeatmap", "StreakHistory", "WeeklySummary"],
+    "journal": ["JournalPage", "JournalEditor", "JournalEntryCard"],
+    "achievements": ["AchievementsPage", "AchievementCard"],
+    "settings": ["SettingsPage", "ThemeSelector", "MascotSelector", "NotificationSettings"],
+    "anime": ["VRMMascot", "MascotDialogue", "SparkleParticles"],
+    "background": ["MeshGradient"],
+    "shared": ["Button", "Card", "Modal", "Toggle", "ProgressBar"]
+  },
+  "assets": {
+    "logo": "public/logo.png",
+    "mascot_models": ["public/models/girl.vrm", "public/models/boy.vrm"],
+    "fonts": ["Inter-Variable.woff2", "JetBrainsMono-Variable.woff2", "Orbitron-Bold.woff2", "ZenMaruGothic-Regular.woff2", "ZenMaruGothic-Medium.woff2", "ZenMaruGothic-Bold.woff2"],
+    "icons": "src-tauri/icons/ (16 variants)"
+  },
+  "config_files": [
+    "package.json",
+    "tsconfig.json",
+    "vite.config.ts",
+    "src-tauri/tauri.conf.json",
+    "src-tauri/Cargo.toml",
+    "src-tauri/capabilities/default.json"
+  ],
+  "design_files": [
+    "design/tamashii_logo_v2.py",
+    "design/tamashii_logo.py"
+  ],
+  "file_counts": {
+    "frontend_ts": 52,
+    "backend_rs": 10,
+    "config": 6,
+    "total_source": 68
+  }
+}
