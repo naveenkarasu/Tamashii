@@ -1,7 +1,15 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Card } from "../shared/Card";
 import { Button } from "../shared/Button";
 import { useBlockerStore } from "../../store/blockerStore";
+import { isAndroid } from "../../lib/platform";
+import {
+  stopVpnBlocker,
+  stopAppBlocker,
+  removeBlocklist,
+  extendLockNative,
+  saveLockExpiryNative,
+} from "../../lib/androidBlocker";
 
 interface TimeRemaining {
   hours: number;
@@ -32,21 +40,74 @@ function pad(n: number): string {
   return n.toString().padStart(2, "0");
 }
 
+const android = isAndroid();
+
 export function LockStatus() {
-  const { isLocked, lockExpiresAt, extendLock } = useBlockerStore();
+  const {
+    isLocked,
+    lockExpiresAt,
+    extendLock,
+    setLockStatus,
+    setVpnActive,
+    setAppBlockerActive,
+  } = useBlockerStore();
+
   const [remaining, setRemaining] = useState<TimeRemaining>(() =>
     calcTimeRemaining(lockExpiresAt),
   );
+  const hasExpiredRef = useRef(false);
 
   const updateTimer = useCallback(() => {
-    setRemaining(calcTimeRemaining(lockExpiresAt));
-  }, [lockExpiresAt]);
+    const r = calcTimeRemaining(lockExpiresAt);
+    setRemaining(r);
+
+    // Handle expiry — stop services
+    if (r.expired && !hasExpiredRef.current) {
+      hasExpiredRef.current = true;
+      handleExpiry();
+    }
+  }, [lockExpiresAt]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
+    hasExpiredRef.current = false;
     updateTimer();
     const interval = setInterval(updateTimer, 1000);
     return () => clearInterval(interval);
   }, [updateTimer]);
+
+  async function handleExpiry() {
+    try {
+      if (android) {
+        await stopVpnBlocker();
+        await stopAppBlocker();
+        setVpnActive(false);
+        setAppBlockerActive(false);
+      } else {
+        await removeBlocklist();
+      }
+    } catch (err) {
+      console.error("Error stopping blockers on expiry:", err);
+    }
+    setLockStatus(false, null);
+  }
+
+  async function handleExtend(hours: number) {
+    extendLock(hours);
+
+    // Persist extended expiry to native side
+    try {
+      if (android) {
+        const newExpiry = useBlockerStore.getState().lockExpiresAt;
+        if (newExpiry) {
+          await saveLockExpiryNative(newExpiry);
+        }
+      } else {
+        await extendLockNative(hours);
+      }
+    } catch (err) {
+      console.error("Error persisting extend:", err);
+    }
+  }
 
   if (!isLocked) return null;
 
@@ -116,7 +177,7 @@ export function LockStatus() {
         <Button
           variant="secondary"
           size="sm"
-          onClick={() => extendLock(24)}
+          onClick={() => handleExtend(24)}
           className="flex-1"
         >
           +24h
@@ -124,7 +185,7 @@ export function LockStatus() {
         <Button
           variant="secondary"
           size="sm"
-          onClick={() => extendLock(24 * 7)}
+          onClick={() => handleExtend(24 * 7)}
           className="flex-1"
         >
           +7d
@@ -132,7 +193,7 @@ export function LockStatus() {
         <Button
           variant="secondary"
           size="sm"
-          onClick={() => extendLock(24 * 30)}
+          onClick={() => handleExtend(24 * 30)}
           className="flex-1"
         >
           +30d

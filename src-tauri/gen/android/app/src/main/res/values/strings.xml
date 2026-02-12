@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Tamashii</string>
+    <string name="main_activity_title">Tamashii</string>
+    <string name="accessibility_description">Tamashii uses accessibility to detect when you open a blocked app and redirect you away from it. This helps you stay focused during your lock period.</string>
+</resources>

@@ -6,6 +6,11 @@ interface BlockerState {
   lockExpiresAt: string | null;
   categories: BlockCategory[];
   customDomains: string[];
+  // Android-specific state
+  vpnActive: boolean;
+  appBlockerActive: boolean;
+  blockedApps: string[];
+  accessibilityEnabled: boolean;
 }
 
 interface BlockerActions {
@@ -15,6 +20,12 @@ interface BlockerActions {
   extendLock: (hours: number) => void;
   loadBlockerStatus: (status: BlockerStatus) => void;
   addCustomDomain: (domain: string) => void;
+  // Android actions
+  setVpnActive: (active: boolean) => void;
+  setAppBlockerActive: (active: boolean) => void;
+  setBlockedApps: (apps: string[]) => void;
+  toggleBlockedApp: (packageName: string) => void;
+  setAccessibilityEnabled: (enabled: boolean) => void;
 }
 
 export const useBlockerStore = create<BlockerState & BlockerActions>()(
@@ -24,6 +35,10 @@ export const useBlockerStore = create<BlockerState & BlockerActions>()(
     lockExpiresAt: null,
     categories: [],
     customDomains: [],
+    vpnActive: false,
+    appBlockerActive: false,
+    blockedApps: [],
+    accessibilityEnabled: false,
 
     // Actions
     setLockStatus: (locked, expiresAt = null) =>
@@ -72,5 +87,26 @@ export const useBlockerStore = create<BlockerState & BlockerActions>()(
         if (state.customDomains.includes(domain)) return state;
         return { customDomains: [...state.customDomains, domain] };
       }),
+
+    // Android actions
+    setVpnActive: (active) => set({ vpnActive: active }),
+
+    setAppBlockerActive: (active) => set({ appBlockerActive: active }),
+
+    setBlockedApps: (apps) => set({ blockedApps: apps }),
+
+    toggleBlockedApp: (packageName) =>
+      set((state) => {
+        if (state.isLocked) return state;
+        const exists = state.blockedApps.includes(packageName);
+        return {
+          blockedApps: exists
+            ? state.blockedApps.filter((p) => p !== packageName)
+            : [...state.blockedApps, packageName],
+        };
+      }),
+
+    setAccessibilityEnabled: (enabled) =>
+      set({ accessibilityEnabled: enabled }),
   }),
 );

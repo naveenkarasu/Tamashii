@@ -3,11 +3,14 @@ import { motion } from "framer-motion";
 import { Shield, Eye, List } from "lucide-react";
 import { useBlockerStore } from "../../store/blockerStore";
 import { blocklists } from "../../lib/blocklists";
+import { isAndroid } from "../../lib/platform";
 import { Button } from "../shared/Button";
 import { LockStatus } from "./LockStatus";
 import { CategoryCard } from "./CategoryCard";
 import { ActivateForm } from "./ActivateForm";
 import { DomainListModal } from "./DomainListModal";
+import { VpnStatusCard } from "./VpnStatusCard";
+import { AppBlockerSection } from "./AppBlockerSection";
 import type { BlockCategory } from "../../types";
 
 /** Map blocklist keys to human-readable names and icons. */
@@ -25,6 +28,8 @@ const stagger = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
 };
+
+const android = isAndroid();
 
 export function BlockerPage() {
   const { isLocked, categories, addCategory, toggleCategory, customDomains } =
@@ -76,7 +81,7 @@ export function BlockerPage() {
       >
         <Shield size={22} className="text-accent" />
         <h1 className="font-display text-lg uppercase tracking-wider text-text-primary">
-          Website Blocking
+          {android ? "Content Blocking" : "Website Blocking"}
         </h1>
       </motion.div>
 
@@ -89,6 +94,18 @@ export function BlockerPage() {
           transition={{ duration: 0.4, delay: 0.08 }}
         >
           <LockStatus />
+        </motion.div>
+      )}
+
+      {/* VPN status (Android only, when locked) */}
+      {android && isLocked && (
+        <motion.div
+          variants={stagger}
+          initial="initial"
+          animate="animate"
+          transition={{ duration: 0.4, delay: 0.12 }}
+        >
+          <VpnStatusCard />
         </motion.div>
       )}
 
@@ -131,6 +148,18 @@ export function BlockerPage() {
           ))}
         </div>
       </motion.div>
+
+      {/* App Blocking section (Android only) */}
+      {android && (
+        <motion.div
+          variants={stagger}
+          initial="initial"
+          animate="animate"
+          transition={{ duration: 0.4, delay: 0.2 }}
+        >
+          <AppBlockerSection />
+        </motion.div>
+      )}
 
       {/* Activate form (only when NOT locked) */}
       {!isLocked && (

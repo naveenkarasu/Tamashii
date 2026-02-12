@@ -4,6 +4,14 @@ import { Card } from "../shared/Card";
 import { Button } from "../shared/Button";
 import { Modal } from "../shared/Modal";
 import { useBlockerStore } from "../../store/blockerStore";
+import { blocklists } from "../../lib/blocklists";
+import { isAndroid } from "../../lib/platform";
+import {
+  startVpnBlocker,
+  startAppBlocker,
+  applyBlocklist,
+  saveLockExpiryNative,
+} from "../../lib/androidBlocker";
 import type { BlockCategory } from "../../types";
 
 const DURATION_OPTIONS = [
@@ -14,9 +22,19 @@ const DURATION_OPTIONS = [
   { label: "90 days", hours: 24 * 90 },
 ] as const;
 
+const android = isAndroid();
+
 export function ActivateForm() {
-  const { isLocked, categories, setLockStatus, toggleCategory } =
-    useBlockerStore();
+  const {
+    isLocked,
+    categories,
+    setLockStatus,
+    toggleCategory,
+    blockedApps,
+    customDomains,
+    setVpnActive,
+    setAppBlockerActive,
+  } = useBlockerStore();
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [durationHours, setDurationHours] = useState<number>(
@@ -24,6 +42,7 @@ export function ActivateForm() {
   );
   const [showConfirm, setShowConfirm] = useState(false);
   const [confirmText, setConfirmText] = useState("");
+  const [activating, setActivating] = useState(false);
 
   // Don't render when already locked
   if (isLocked) return null;
@@ -48,24 +67,66 @@ export function ActivateForm() {
     setShowConfirm(true);
   }
 
-  function handleConfirmLock() {
+  async function handleConfirmLock() {
     if (confirmText !== "LOCK") return;
+    setActivating(true);
 
-    // Enable selected categories that aren't already enabled
-    for (const id of selectedIds) {
-      const cat = categories.find((c) => c.id === id);
-      if (cat && !cat.isEnabled) {
-        toggleCategory(id);
+    try {
+      // Enable selected categories
+      for (const id of selectedIds) {
+        const cat = categories.find((c) => c.id === id);
+        if (cat && !cat.isEnabled) {
+          toggleCategory(id);
+        }
       }
+
+      // Collect all domains from selected categories + custom domains
+      const domains: string[] = [];
+      for (const id of selectedIds) {
+        const list = blocklists[id];
+        if (list) {
+          domains.push(...list.domains);
+        }
+      }
+      domains.push(...customDomains);
+
+      // Calculate expiry
+      const expiresAt = new Date();
+      expiresAt.setHours(expiresAt.getHours() + durationHours);
+      const expiryIso = expiresAt.toISOString();
+
+      if (android) {
+        // Android: Start VPN DNS blocker
+        if (domains.length > 0) {
+          await startVpnBlocker(domains);
+          setVpnActive(true);
+        }
+
+        // Android: Start app blocker (if apps selected)
+        if (blockedApps.length > 0) {
+          await startAppBlocker(blockedApps);
+          setAppBlockerActive(true);
+        }
+
+        // Persist lock expiry to native SharedPreferences
+        await saveLockExpiryNative(expiryIso);
+      } else {
+        // Desktop (Windows): Apply hosts file blocker
+        if (domains.length > 0) {
+          await applyBlocklist(domains);
+        }
+      }
+
+      // Update frontend state
+      setLockStatus(true, expiryIso);
+      setShowConfirm(false);
+      setSelectedIds(new Set());
+    } catch (err) {
+      console.error("Failed to activate blocker:", err);
+      // Still show error but don't break UI
+    } finally {
+      setActivating(false);
     }
-
-    // Set lock with expiry
-    const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + durationHours);
-    setLockStatus(true, expiresAt.toISOString());
-
-    setShowConfirm(false);
-    setSelectedIds(new Set());
   }
 
   return (
@@ -113,6 +174,15 @@ export function ActivateForm() {
             </p>
           )}
         </div>
+
+        {/* Summary for Android */}
+        {android && blockedApps.length > 0 && (
+          <div className="mb-4 p-3 rounded-md bg-accent/5 border border-accent/20">
+            <p className="font-sans text-xs text-text-secondary">
+              <span className="text-accent font-medium">{blockedApps.length} app{blockedApps.length === 1 ? "" : "s"}</span> will also be blocked via Accessibility Service
+            </p>
+          </div>
+        )}
 
         {/* Duration select */}
         <div className="mb-4">
@@ -170,6 +240,13 @@ export function ActivateForm() {
             . This action cannot be undone until the lock expires.
           </p>
 
+          {android && (
+            <p className="font-sans text-xs text-text-secondary bg-bg-card p-2 rounded">
+              Android: VPN DNS filtering will activate.
+              {blockedApps.length > 0 && ` ${blockedApps.length} app(s) will be blocked.`}
+            </p>
+          )}
+
           <p className="font-sans text-sm text-warning">
             Type <span className="font-mono font-bold">LOCK</span> to confirm:
           </p>
@@ -195,16 +272,17 @@ export function ActivateForm() {
               variant="ghost"
               onClick={() => setShowConfirm(false)}
               className="flex-1"
+              disabled={activating}
             >
               Cancel
             </Button>
             <Button
               variant="danger"
               onClick={handleConfirmLock}
-              disabled={confirmText !== "LOCK"}
+              disabled={confirmText !== "LOCK" || activating}
               className="flex-1"
             >
-              CONFIRM LOCK
+              {activating ? "ACTIVATING..." : "CONFIRM LOCK"}
             </Button>
           </div>
         </div>

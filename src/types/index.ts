@@ -82,3 +82,17 @@ export interface QuickStat {
   icon: string;
   route: string;
 }
+
+// ─── Android blocker types ────────────────────────────────────────────────
+
+export interface VpnStatus {
+  isRunning: boolean;
+  blockedCount: number;
+  domainsLoaded: number;
+}
+
+export interface InstalledApp {
+  packageName: string;
+  appName: string;
+  iconBase64: string;
+}

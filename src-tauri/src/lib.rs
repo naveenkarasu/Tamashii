@@ -1,5 +1,5 @@
-mod blocker;
 mod commands;
+mod plugins;
 mod scheduler;
 
 use tauri::Manager;
@@ -20,12 +20,8 @@ pub fn run() {
         .plugin(tauri_plugin_sql::Builder::default().build())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_store::Builder::default().build())
+        .plugin(plugins::blocker::init())
         .invoke_handler(tauri::generate_handler![
-            commands::blocker::apply_blocklist,
-            commands::blocker::remove_blocklist,
-            commands::blocker::get_blocker_status,
-            commands::blocker::check_admin,
-            commands::blocker::extend_lock,
             commands::streak::get_streak_data,
             commands::streak::save_streak_data,
         ]);
